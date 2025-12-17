@@ -1,8 +1,9 @@
 import './style.css'
+
 async function getData(/*name*/) {
   try {
     // go get data
-    const response = await fetch(/*paste the link of api using`` /${name}*/);
+    const response = await fetch(`https://openlibrary.org/authors`);
     // handle errors
     if (response.status != 200) {
       throw new Error(response);
