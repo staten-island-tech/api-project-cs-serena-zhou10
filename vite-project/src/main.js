@@ -1,9 +1,7 @@
-import './style.css'
-
-async function getData(/*name*/) {
+async function getData() {
   try {
     // go get data
-    const response = await fetch(`https://openlibrary.org/authors`);
+    const response = await fetch(`https://openlibrary.org/authors/OL23919A.json`);
     // handle errors
     if (response.status != 200) {
       throw new Error(response);
@@ -17,4 +15,4 @@ async function getData(/*name*/) {
     console.log(error);
   }
 }
-getData(/*"name"*/);
+getData();
