@@ -1,7 +1,15 @@
-const query = "key:(/authors/OL7484395A OR /authors/OL10294608A)";
-const URL =
-  "https://openlibrary.org/search/authors.json?q=" +
-  encodeURIComponent(query);
+const URL = "https://openlibrary.org/authors/OL23919A/works.json";
+
+
+function inject(item) {
+  const entriesContainer = document.querySelector(".api-response");
+
+  entriesContainer.insertAdjacentHTML("beforeend",
+    `<div class="card">
+            <h1>${item.title}</h1>
+          </div>`
+  );
+}
 
 async function getData(URL) {
   try {
@@ -9,18 +17,16 @@ async function getData(URL) {
 
     if (response.status != 200) {
       throw new Error(response);
+    } else {
+      const data = await response.json();
+      console.log(data);
+
+      data.entries.forEach(inject);
     }
 
-    const data = await response.json();
-    console.log(data);
-
-    document.getElementById("api-response").textContent =
-      data.docs?.[0]?.name || "No authors found";
-
   } catch (error) {
-    console.error(error);
-    document.getElementById("api-response").textContent =
-      "API failed to load";
+    console.log(error);
+    console.log("Failed to Load");
   }
 }
 
