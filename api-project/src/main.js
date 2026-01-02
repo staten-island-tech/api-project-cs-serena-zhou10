@@ -1,4 +1,5 @@
 const URL = "https://openlibrary.org/authors/OL23919A/works.json";
+let books = [];
 
 
 function inject(item) {
@@ -15,19 +16,46 @@ async function getData(URL) {
   try {
     const response = await fetch(URL);
 
-    if (response.status != 200) {
+    if (!response.ok) {
       throw new Error(response);
-    } else {
+    }
       const data = await response.json();
       console.log(data);
 
-      data.entries.forEach(inject);
-    }
-
+      books = data.entries;
+      document.querySelector(".api-response").innerHTML = "";
+      books.forEach(inject);
+      setupSearch(books);
+      
   } catch (error) {
     console.log(error);
     console.log("Failed to Load");
   }
+}
+
+function setupSearch(books) {
+  const form = document.querySelector("#search-form");
+  const input = document.querySelector("#search-input");
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const searchTerm = input.value.toLowerCase();
+
+    document.querySelector(".api-response").innerHTML = "";
+
+    const filteredBooks = books.filter(book =>
+      book.title.toLowerCase().includes(searchTerm)
+    );
+
+    if (filteredBooks.length === 0) {
+      document.querySelector(".api-response").innerHTML =
+        `<p>No matching books found.</p>`;
+      return;
+    }
+
+    filteredBooks.forEach(book => inject(book));
+  });
 }
 
 getData(URL);
