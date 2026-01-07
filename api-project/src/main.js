@@ -1,5 +1,7 @@
 import "./style.css";
+
 const URL = "https://openlibrary.org/authors/OL7486601A/works.json";
+let books = [];
 
 function inject(item) {
   const entriesContainer = document.querySelector(".api-response");
@@ -7,8 +9,8 @@ function inject(item) {
   entriesContainer.insertAdjacentHTML(
     "beforeend",
     `<div class="card">
-            <h1>${item.title}</h1>
-          </div>`
+      <h1>${item.title}</h1>
+    </div>`
   );
 }
 
@@ -16,29 +18,31 @@ async function getData(URL) {
   try {
     const response = await fetch(URL);
 
-    if (response.status != 200) {
-      throw new Error(response);
-    } else {
-      const data = await response.json();
-      console.log(data);
-
-      data.entries.forEach(inject);
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
     }
+
+    const data = await response.json();
+    books = data.entries;
+
+    document.querySelector(".api-response").innerHTML = "";
+    books.forEach(inject);
+
+    setupSearch(books);
   } catch (error) {
-    console.log(error);
-    console.log("Failed to Load");
+    console.log("Failed to Load", error);
   }
 }
 
 function setupSearch(books) {
-  const form = document.querySelector(".search-form");
-  const input = document.querySelector(".search-input");
+  const form = document.querySelector("#search-form");
+  const input = document.querySelector(".search-input2");
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const searchTerm = input.value.toLowerCase();
-
+    const searchTerm = input.value;
+    console.log(input.value);
     document.querySelector(".api-response").innerHTML = "";
 
     const filteredBooks = books.filter((book) =>
@@ -46,15 +50,13 @@ function setupSearch(books) {
     );
 
     if (filteredBooks.length === 0) {
-      document.querySelector(
-        ".api-response"
-      ).innerHTML = `<p>No matching books found.</p>`;
+      document.querySelector(".api-response").innerHTML =
+        "<p>No matching books found.</p>";
       return;
     }
 
-    filteredBooks.forEach((book) => inject(book));
+    filteredBooks.forEach(inject);
   });
 }
 
 getData(URL);
-setupSearch();
