@@ -34,28 +34,47 @@ async function getData(URL) {
   }
 }
 
-function setupSearch(books) {
+function setupSearch() {
   const form = document.querySelector("#search-form");
   const input = document.querySelector(".search-input2");
+  const results = document.querySelector(".api-response");
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const searchTerm = input.value;
-    console.log(input.value);
-    document.querySelector(".api-response").innerHTML = "";
+    const searchTerm = input.value.trim().toLowerCase();
 
-    const filteredBooks = books.filter((book) =>
-      book.title.toLowerCase().includes(searchTerm)
-    );
-
-    if (filteredBooks.length === 0) {
-      document.querySelector(".api-response").innerHTML =
-        "<p>No matching books found.</p>";
+    if (!searchTerm) {
+      results.innerHTML = "<p>Please enter a book title.</p>";
       return;
     }
 
-    filteredBooks.forEach(inject);
+    results.innerHTML = "<p>Searching...</p>";
+
+    try {
+      const searchURL = `https://openlibrary.org/search.json?author=R.F.+Kuang&title=${searchTerm}`;
+      const response = await fetch(searchURL);
+
+      if (!response.ok) {
+        throw new Error("Search request failed");
+      }
+
+      const data = await response.json();
+      results.innerHTML = "";
+
+      if (data.docs.length === 0) {
+        results.innerHTML = "<p>No matching books found.</p>";
+        return;
+      }
+
+      data.docs.forEach((books) => {
+        inject({ title: books.title });
+      });
+    } catch (error) {
+      results.innerHTML =
+        "<p>Something went wrong while searching. Please try again.</p>";
+      console.error(error);
+    }
   });
 }
 
